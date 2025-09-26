@@ -1,18 +1,19 @@
 // netlify/functions/airtableWebhook.js
+import fetch from "node-fetch";
 
 export const handler = async (event) => {
   try {
-  
+    // 1. Отримуємо дані з Airtable webhook
     const body = JSON.parse(event.body);
     console.log("📥 Airtable data:", body);
 
-    const recordId ='345456456';     
-    const status = 'updated';          
-    const draftOrderId = '1231568929047';   
-    const lineItems = null;  
-    const paid = false           
+    const recordId = body.recordId;     
+    const status = body.status;          
+    const draftOrderId = body.draftId;   
+    const lineItems = body.lineItems;    
+    const paid = body.paid;             
 
-   
+    // 2. Якщо це просто оновлення — оновлюємо Draft Order
     if (status === "updated") {
       await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}.json`, {
         method: "PUT",
@@ -30,7 +31,7 @@ export const handler = async (event) => {
       });
     }
 
-  
+    // 3. Якщо оплачено — завершуємо драфт
     if (paid === true) {
       await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`, {
         method: "POST",
