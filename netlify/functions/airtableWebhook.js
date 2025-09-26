@@ -14,7 +14,7 @@ export const handler = async (event) => {
 
     // 2. Якщо це просто оновлення — оновлюємо Draft Order
     if (status === "updated") {
-      await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}.json`, {
+      await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2025-01/draft_orders/${draftOrderId}.json`, {
         method: "PUT",
         headers: {
           "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_API_TOKEN,
@@ -32,7 +32,7 @@ export const handler = async (event) => {
 
     // 3. Якщо оплачено — завершуємо драфт
     if (paid === true) {
-      await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`, {
+      await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`, {
         method: "POST",
         headers: {
           "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_API_TOKEN,
