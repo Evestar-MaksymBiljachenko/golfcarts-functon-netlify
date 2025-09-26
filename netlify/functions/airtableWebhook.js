@@ -24,7 +24,7 @@ export const handler = async (event) => {
     }
 
     if (status === "updated") {
-      const shopifyUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}.json`;
+      const shopifyUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2025-01/draft_orders/${draftOrderId}.json`;
       const response = await fetch(shopifyUrl, {
         method: "PUT",
         headers: {
@@ -50,7 +50,7 @@ export const handler = async (event) => {
     }
 
     if (paid === true) {
-      const completeUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`;
+      const completeUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`;
       const completeResponse = await fetch(completeUrl, {
         method: "PUT", // Corrected from POST to PUT as per Shopify docs
         headers: {
