@@ -2,19 +2,30 @@
 
 export const handler = async (event) => {
   try {
-    // 1. Отримуємо дані з Airtable webhook
+    if (!event.body) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Request body is missing" }),
+      };
+    }
+
     const body = JSON.parse(event.body);
     console.log("📥 Airtable data:", body);
 
-    const recordId = body.recordId;     
-    const status = body.status;          
-    const draftOrderId = body.draftId;   
-    const lineItems = body.lineItems;    
-    const paid = body.paid;             
+    const { status, draftOrderId, lineItems, paid } = body;
 
-    // 2. Якщо це просто оновлення — оновлюємо Draft Order
+    if (!draftOrderId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: "draftOrderId is required in the request body",
+        }),
+      };
+    }
+
     if (status === "updated") {
-      await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2025-01/draft_orders/${draftOrderId}.json`, {
+      const shopifyUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}.json`;
+      const response = await fetch(shopifyUrl, {
         method: "PUT",
         headers: {
           "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_API_TOKEN,
@@ -28,17 +39,33 @@ export const handler = async (event) => {
           },
         }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("❌ Shopify API Error:", errorData);
+        throw new Error(
+          `Shopify API responded with status ${response.status}: ${JSON.stringify(errorData)}`
+        );
+      }
     }
 
-    // 3. Якщо оплачено — завершуємо драфт
     if (paid === true) {
-      await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`, {
-        method: "POST",
+      const completeUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}.myshopify.com/admin/api/2025-01/draft_orders/${draftOrderId}/complete.json`;
+      const completeResponse = await fetch(completeUrl, {
+        method: "PUT", // Corrected from POST to PUT as per Shopify docs
         headers: {
           "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_API_TOKEN,
           "Content-Type": "application/json",
         },
       });
+
+      if (!completeResponse.ok) {
+        const errorData = await completeResponse.json();
+        console.error("❌ Shopify API Error (complete):", errorData);
+        throw new Error(
+          `Shopify API (complete) responded with status ${completeResponse.status}: ${JSON.stringify(errorData)}`
+        );
+      }
     }
 
     return {
