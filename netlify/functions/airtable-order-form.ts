@@ -143,7 +143,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
                 throw new Error(`Failed to create Shopify Draft Order: ${JSON.stringify(errorData)}`);
             } else {
                 const shopifyData = await shopifyResponse.json();
-                shopifyDraftOrderId = shopifyData.draft_order.id; // CAPTURE THE DRAFT ORDER ID HERE!
+                shopifyDraftOrderId = shopifyData.draft_order.id.toString(); // CAPTURE THE DRAFT ORDER ID HERE!
                 console.log('Shopify Draft Order Created with ID:', shopifyDraftOrderId);
             }
         } catch (err) {
